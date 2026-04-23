@@ -1,0 +1,32 @@
+<section class="auth-card">
+  <h1>Crea Account Customer</h1>
+  <p>Il ruolo assegnato e sempre Customer.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Nome
+      <input type="text" formControlName="firstName" />
+    </label>
+
+    <label>
+      Cognome
+      <input type="text" formControlName="lastName" />
+    </label>
+
+    <label>
+      Email
+      <input type="email" formControlName="email" />
+    </label>
+
+    <label>
+      Password
+      <input type="password" formControlName="password" />
+    </label>
+
+    <button type="submit" [disabled]="isSubmitting || form.invalid">
+      {{ isSubmitting ? 'Creazione in corso...' : 'Registrati' }}
+    </button>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </form>
+</section>

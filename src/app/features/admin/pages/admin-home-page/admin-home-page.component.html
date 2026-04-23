@@ -1,0 +1,61 @@
+<section class="role-page">
+  <h1>Area Admin</h1>
+  <p>Gestione utenti applicativa e controllo ruoli.</p>
+
+  <p class="error" *ngIf="pageError">{{ pageError }}</p>
+
+  <div class="layout" *ngIf="!isLoading; else loadingTpl">
+    <article class="panel">
+      <h2>{{ editingUserId ? 'Modifica Utente' : 'Nuovo Utente' }}</h2>
+
+      <form [formGroup]="userForm" (ngSubmit)="saveUser()">
+        <label>Email <input type="email" formControlName="email" /></label>
+        <label *ngIf="!editingUserId">Password iniziale <input type="password" formControlName="password" /></label>
+        <label>Nome <input type="text" formControlName="firstName" /></label>
+        <label>Cognome <input type="text" formControlName="lastName" /></label>
+
+        <label>
+          Ruolo
+          <select formControlName="roleId">
+            <option *ngFor="let role of roleOptions" [value]="role.id">{{ role.label }}</option>
+          </select>
+        </label>
+
+        <label class="checkbox-line">
+          <input type="checkbox" formControlName="requirePasswordChange" />
+          Richiedi cambio password al prossimo login
+        </label>
+
+        <div class="actions">
+          <button type="submit" [disabled]="userForm.invalid">
+            {{ editingUserId ? 'Aggiorna Utente' : 'Crea Utente' }}
+          </button>
+          <button type="button" class="ghost" (click)="resetForm()">Reset</button>
+        </div>
+      </form>
+    </article>
+
+    <article class="panel wide">
+      <h2>Utenti Registrati</h2>
+      <div class="list">
+        <div class="item" *ngFor="let user of users">
+          <div>
+            <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+            <p>{{ user.email }}</p>
+            <p>Ruolo: {{ getRoleLabel(user.roleId) }}</p>
+            <p>Force password change: {{ user.requirePasswordChange ? 'si' : 'no' }}</p>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="ghost" (click)="editUser(user)">Modifica</button>
+            <button type="button" class="danger" (click)="deleteUser(user.id)">Elimina</button>
+          </div>
+        </div>
+        <p class="empty" *ngIf="users.length === 0">Nessun utente presente.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<ng-template #loadingTpl>
+  <p class="loading">Caricamento utenti...</p>
+</ng-template>

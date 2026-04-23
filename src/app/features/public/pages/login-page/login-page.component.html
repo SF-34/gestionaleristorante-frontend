@@ -1,0 +1,22 @@
+<section class="auth-card">
+  <h1>Accesso</h1>
+  <p>Inserisci le tue credenziali per continuare.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      Email
+      <input type="email" formControlName="email" placeholder="nome@esempio.it" />
+    </label>
+
+    <label>
+      Password
+      <input type="password" formControlName="password" placeholder="********" />
+    </label>
+
+    <button type="submit" [disabled]="isSubmitting || form.invalid">
+      {{ isSubmitting ? 'Accesso in corso...' : 'Login' }}
+    </button>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </form>
+</section>

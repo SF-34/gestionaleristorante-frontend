@@ -1,0 +1,26 @@
+<header class="topbar">
+  <div class="brand">
+    <a routerLink="/menu">TavolaViva</a>
+    <span>Restaurant Management</span>
+  </div>
+
+  <nav class="nav-links">
+    <a routerLink="/menu" routerLinkActive="active">Menu</a>
+    <ng-container *ngIf="session$ | async as session">
+      <a *ngIf="session.roleId === roleId.Customer || session.roleId === roleId.Admin" routerLink="/customer" routerLinkActive="active">Customer</a>
+      <a *ngIf="session.roleId === roleId.Kitchen || session.roleId === roleId.Admin" routerLink="/kitchen" routerLinkActive="active">Kitchen</a>
+      <a *ngIf="session.roleId === roleId.Sala || session.roleId === roleId.Admin" routerLink="/sala" routerLinkActive="active">Sala</a>
+      <a *ngIf="session.roleId === roleId.Admin" routerLink="/admin" routerLinkActive="active">Admin</a>
+    </ng-container>
+  </nav>
+
+  <div class="auth-actions">
+    <ng-container *ngIf="isAuthenticated$ | async; else guestActions">
+      <button type="button" class="secondary" (click)="logout()">Logout</button>
+    </ng-container>
+    <ng-template #guestActions>
+      <a routerLink="/login" class="secondary">Login</a>
+      <a routerLink="/signup" class="primary">Signup</a>
+    </ng-template>
+  </div>
+</header>

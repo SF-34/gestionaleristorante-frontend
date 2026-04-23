@@ -1,0 +1,107 @@
+<section class="role-page">
+  <h1>Area Sala</h1>
+  <p>Gestione tavoli, comande sala e passaggi a served/cancelled.</p>
+
+  <p class="error" *ngIf="pageError">{{ pageError }}</p>
+
+  <div class="layout" *ngIf="!isLoading; else loadingTpl">
+    <article class="panel">
+      <h2>{{ editingTableId ? 'Modifica Tavolo' : 'Nuovo Tavolo' }}</h2>
+      <form [formGroup]="tableForm" (ngSubmit)="saveTable()">
+        <label>Nome <input type="text" formControlName="name" /></label>
+        <label>Capienza <input type="number" min="1" formControlName="capacity" /></label>
+        <label>
+          Stato
+          <select formControlName="status">
+            <option *ngFor="let status of tableStatuses" [value]="status">{{ status }}</option>
+          </select>
+        </label>
+
+        <div class="actions">
+          <button type="submit" [disabled]="tableForm.invalid">{{ editingTableId ? 'Aggiorna' : 'Crea' }}</button>
+          <button type="button" class="ghost" (click)="resetTableForm()">Reset</button>
+        </div>
+      </form>
+
+      <h3>Tavoli</h3>
+      <div class="list">
+        <div class="item" *ngFor="let table of tables">
+          <div>
+            <strong>{{ table.name }}</strong>
+            <p>{{ table.capacity }} coperti - {{ table.status }}</p>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="ghost" (click)="editTable(table)">Modifica</button>
+            <button type="button" class="danger" (click)="deleteTable(table.id)">Elimina</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Crea Ordine Sala</h2>
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <label>
+          Tavolo
+          <select formControlName="tableId">
+            <option [value]="0" disabled>Seleziona tavolo</option>
+            <option *ngFor="let table of tables" [value]="table.id">{{ table.name }}</option>
+          </select>
+        </label>
+
+        <label>
+          Piatto
+          <select formControlName="dishId">
+            <option [value]="0" disabled>Seleziona piatto</option>
+            <option *ngFor="let dish of dishes" [value]="dish.id">{{ dish.name }}</option>
+          </select>
+        </label>
+
+        <label>Quantita <input type="number" min="1" formControlName="quantity" /></label>
+        <label>Note <textarea rows="2" formControlName="notes"></textarea></label>
+
+        <button type="submit" [disabled]="orderForm.invalid">Crea Ordine</button>
+      </form>
+
+      <h3>Menu Disponibile</h3>
+      <div class="list compact">
+        <div class="item" *ngFor="let dish of dishes">
+          <div>
+            <strong>{{ dish.name }}</strong>
+            <p>{{ dish.price | currency: 'EUR' }}</p>
+          </div>
+        </div>
+        <p class="empty" *ngIf="dishes.length === 0">Nessun piatto disponibile.</p>
+      </div>
+    </article>
+
+    <article class="panel wide">
+      <h2>Ordini Sala</h2>
+      <div class="list">
+        <div class="item order" *ngFor="let order of orders">
+          <div>
+            <strong>Ordine #{{ order.id }}</strong>
+            <p>Tavolo: {{ order.tableId || '-' }} - Stato: {{ order.status }}</p>
+            <ul>
+              <li *ngFor="let item of order.items">{{ item.dishName }} x{{ item.quantity }}</li>
+            </ul>
+          </div>
+          <div class="item-actions">
+            <button
+              *ngFor="let action of getSalaTransitions(order)"
+              [class.danger]="action.status === orderStatus.cancelled"
+              type="button"
+              (click)="applySalaTransition(order.id, action.status)">
+              {{ action.label }}
+            </button>
+          </div>
+        </div>
+        <p class="empty" *ngIf="orders.length === 0">Nessun ordine disponibile.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<ng-template #loadingTpl>
+  <p class="loading">Caricamento area sala...</p>
+</ng-template>

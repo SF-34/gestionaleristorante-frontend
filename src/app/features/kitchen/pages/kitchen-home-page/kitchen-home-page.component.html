@@ -1,0 +1,99 @@
+<section class="role-page">
+  <h1>Area Kitchen</h1>
+  <p>Gestione piatti, ingredienti e transizioni cucina ordini.</p>
+
+  <p class="error" *ngIf="pageError">{{ pageError }}</p>
+
+  <div class="layout" *ngIf="!isLoading; else loadingTpl">
+    <article class="panel">
+      <h2>{{ editingDishId ? 'Modifica Piatto' : 'Nuovo Piatto' }}</h2>
+      <form [formGroup]="dishForm" (ngSubmit)="saveDish()">
+        <label>Nome <input type="text" formControlName="name" /></label>
+        <label>Descrizione <textarea rows="2" formControlName="description"></textarea></label>
+        <label>Prezzo <input type="number" step="0.01" min="0.01" formControlName="price" /></label>
+        <label class="checkbox-line">
+          <input type="checkbox" formControlName="isAvailable" /> Disponibile
+        </label>
+
+        <div class="actions">
+          <button type="submit" [disabled]="dishForm.invalid">{{ editingDishId ? 'Aggiorna' : 'Crea' }}</button>
+          <button type="button" class="ghost" (click)="resetDishForm()">Reset</button>
+        </div>
+      </form>
+
+      <h3>Piatti</h3>
+      <div class="list">
+        <div class="item" *ngFor="let dish of dishes">
+          <div>
+            <strong>{{ dish.name }}</strong>
+            <p>{{ dish.price | currency: 'EUR' }} - {{ dish.isAvailable ? 'Disponibile' : 'Off' }}</p>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="ghost" (click)="editDish(dish)">Modifica</button>
+            <button type="button" class="danger" (click)="deleteDish(dish.id)">Elimina</button>
+            <label class="upload-btn">
+              Upload
+              <input type="file" accept="image/*" (change)="uploadDishImage(dish.id, $event)" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>{{ editingIngredientId ? 'Modifica Ingrediente' : 'Nuovo Ingrediente' }}</h2>
+      <form [formGroup]="ingredientForm" (ngSubmit)="saveIngredient()">
+        <label>Nome <input type="text" formControlName="name" /></label>
+        <label>Quantita <input type="number" min="0" step="0.001" formControlName="quantityInStock" /></label>
+        <label>Unita <input type="text" formControlName="unit" /></label>
+
+        <div class="actions">
+          <button type="submit" [disabled]="ingredientForm.invalid">{{ editingIngredientId ? 'Aggiorna' : 'Crea' }}</button>
+          <button type="button" class="ghost" (click)="resetIngredientForm()">Reset</button>
+        </div>
+      </form>
+
+      <h3>Ingredienti</h3>
+      <div class="list">
+        <div class="item" *ngFor="let ingredient of ingredients">
+          <div>
+            <strong>{{ ingredient.name }}</strong>
+            <p>{{ ingredient.quantityInStock }} {{ ingredient.unit }}</p>
+          </div>
+          <div class="item-actions">
+            <button type="button" class="ghost" (click)="editIngredient(ingredient)">Modifica</button>
+            <button type="button" class="danger" (click)="deleteIngredient(ingredient.id)">Elimina</button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel wide">
+      <h2>Pipeline Ordini Cucina</h2>
+      <div class="list">
+        <div class="item order" *ngFor="let order of orders">
+          <div>
+            <strong>Ordine #{{ order.id }}</strong>
+            <p>Stato: {{ order.status }}</p>
+            <ul>
+              <li *ngFor="let item of order.items">{{ item.dishName }} x{{ item.quantity }}</li>
+            </ul>
+          </div>
+          <div class="item-actions">
+            <button
+              *ngFor="let action of getKitchenTransitions(order)"
+              type="button"
+              (click)="applyKitchenTransition(order.id, action.status)">
+              {{ action.label }}
+            </button>
+          </div>
+        </div>
+        <p class="empty" *ngIf="orders.length === 0">Nessun ordine in pipeline.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<ng-template #loadingTpl>
+  <p class="loading">Caricamento area kitchen...</p>
+</ng-template>

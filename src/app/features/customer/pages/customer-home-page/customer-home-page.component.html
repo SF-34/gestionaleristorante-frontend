@@ -1,0 +1,118 @@
+<section class="role-page">
+  <h1>Area Customer</h1>
+  <p>Prenotazioni e comande online personali. Nessuna modifica: solo creazione e cancellazione.</p>
+
+  <p class="error" *ngIf="pageError">{{ pageError }}</p>
+
+  <div class="layout" *ngIf="!isLoading; else loadingTpl">
+    <article class="panel">
+      <h2>Nuova Prenotazione</h2>
+      <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">
+        <label>
+          Tavolo
+          <select formControlName="tableId">
+            <option [ngValue]="0">Seleziona tavolo</option>
+            <option *ngFor="let table of tables" [ngValue]="table.id">
+              {{ table.name }} ({{ table.capacity }} posti)
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Data e Ora (UTC convertita client)
+          <input type="datetime-local" formControlName="reservationAtUtc" />
+        </label>
+
+        <label>
+          Persone
+          <input type="number" min="1" max="100" formControlName="partySize" />
+        </label>
+
+        <label>
+          Note
+          <textarea rows="2" formControlName="notes"></textarea>
+        </label>
+
+        <button type="submit" [disabled]="reservationForm.invalid || isSubmittingReservation">
+          {{ isSubmittingReservation ? 'Salvataggio...' : 'Crea Prenotazione' }}
+        </button>
+      </form>
+
+      <h3>Le Tue Prenotazioni</h3>
+      <div class="list">
+        <div class="item" *ngFor="let reservation of reservations">
+          <div>
+            <strong>{{ getTableName(reservation.tableId) }}</strong>
+            <p>{{ reservation.reservationAtUtc | date: 'short' }} - {{ reservation.partySize }} persone</p>
+          </div>
+          <button type="button" class="danger" (click)="deleteReservation(reservation.id)">Cancella</button>
+        </div>
+        <p *ngIf="reservations.length === 0" class="empty">Nessuna prenotazione presente.</p>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Nuova Comanda Online</h2>
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <label>
+          Tavolo (opzionale)
+          <select formControlName="tableId">
+            <option value="">Nessun tavolo</option>
+            <option *ngFor="let table of tables" [value]="table.id">{{ table.name }}</option>
+          </select>
+        </label>
+
+        <label>
+          Piatto
+          <select formControlName="dishId">
+            <option [ngValue]="0">Seleziona piatto</option>
+            <option *ngFor="let dish of dishes" [ngValue]="dish.id" [disabled]="!dish.isAvailable">
+              {{ dish.name }} - {{ dish.price | currency: 'EUR' }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Quantita
+          <input type="number" min="1" max="999" formControlName="quantity" />
+        </label>
+
+        <label>
+          Note
+          <textarea rows="2" formControlName="notes"></textarea>
+        </label>
+
+        <button type="submit" [disabled]="orderForm.invalid || isSubmittingOrder">
+          {{ isSubmittingOrder ? 'Invio...' : 'Crea Comanda' }}
+        </button>
+      </form>
+
+      <h3>Le Tue Comande</h3>
+      <div class="list">
+        <div class="item order" *ngFor="let order of orders">
+          <div>
+            <strong>Ordine #{{ order.id }}</strong>
+            <p>Stato: {{ order.status }}</p>
+            <ul>
+              <li *ngFor="let item of order.items">
+                {{ item.dishName }} x{{ item.quantity }}
+              </li>
+            </ul>
+          </div>
+          <button
+            type="button"
+            class="danger"
+            [disabled]="order.status !== orderStatus.pending"
+            (click)="cancelOrder(order.id)">
+            Cancella
+          </button>
+        </div>
+        <p *ngIf="orders.length === 0" class="empty">Nessuna comanda presente.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<ng-template #loadingTpl>
+  <p class="loading">Caricamento area customer...</p>
+</ng-template>

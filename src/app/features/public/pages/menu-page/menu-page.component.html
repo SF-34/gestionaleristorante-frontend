@@ -1,0 +1,26 @@
+<section class="hero">
+  <h1>Menu Del Giorno</h1>
+  <p>Consultazione pubblica dei piatti disponibili.</p>
+</section>
+
+<section class="menu-grid" *ngIf="!isLoading; else loadingTpl">
+  <article class="dish-card" *ngFor="let dish of dishes">
+    <img *ngIf="dish.imageUrl" [src]="dish.imageUrl" [alt]="dish.name" />
+    <div class="dish-meta">
+      <h2>{{ dish.name }}</h2>
+      <p>{{ dish.description || 'Nessuna descrizione disponibile.' }}</p>
+      <div class="dish-footer">
+        <span class="price">{{ dish.price | currency: 'EUR' }}</span>
+        <span [class.available]="dish.isAvailable" [class.unavailable]="!dish.isAvailable">
+          {{ dish.isAvailable ? 'Disponibile' : 'Non disponibile' }}
+        </span>
+      </div>
+    </div>
+  </article>
+
+  <p class="empty" *ngIf="dishes.length === 0">Nessun piatto disponibile.</p>
+</section>
+
+<ng-template #loadingTpl>
+  <p class="loading">Caricamento menu...</p>
+</ng-template>
